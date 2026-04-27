@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Трекер задач - Мобильная версия</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 12px;
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+        }
+
+        /* Auth Modal */
+        .modal {
+            display: flex;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 24px 20px;
+            border-radius: 20px;
+            max-width: 100%;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .modal-content h2 {
+            margin-bottom: 20px;
+            color: #333;
+            font-size: 24px;
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            border-radius: 15px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 20px;
+            margin-bottom: 8px;
+        }
+
+        .user-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 8px;
+        }
+
+        .role-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 12px;
+            background: #667eea;
+            color: white;
+            display: inline-block;
+        }
+
+        button {
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            background: #667eea;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+            -webkit-appearance: none;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        button.danger {
+            background: #e53e3e;
+        }
+
+        button.success {
+            background: #48bb78;
+        }
+
+        button.warning {
+            background: #ed8936;
+        }
+
+        button.secondary {
+            background: #718096;
+        }
+
+        input, textarea, select {
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            width: 100%;
+            -webkit-appearance: none;
+            font-family: inherit;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        /* Main layout - мобильная версия */
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* Task sections */
+        .task-section {
+            background: white;
+            border-radius: 15px;
+            padding: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .task-section h2 {
+            font-size: 18px;
+            margin-bottom: 16px;
+        }
+
+        .task-list {
+            max-height: 60vh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .task-card {
+            background: #f7f9fc;
+            border-left: 4px solid #667eea;
+            padding: 12px;
+            margin-bottom: 12px;
+            border-radius: 10px;
+            transition: all 0.2s;
+        }
+
+        .task-card:active {
+            transform: scale(0.99);
+        }
+
+        .task-title {
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 6px;
+            word-break: break-word;
+        }
+
+        .task-description {
+            color: #666;
+            font-size: 13px;
+            margin-bottom: 8px;
+            word-break: break-word;
+        }
+
+        .task-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            font-size: 11px;
+            color: #888;
+            margin-bottom: 10px;
+        }
+
+        .task-meta-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .task-due {
+            color: #e53e3e;
+            font-weight: bold;
+        }
+
+        .task-status {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .status-in-progress {
+            background: #fef5e7;
+            color: #f39c12;
+        }
+
+        .status-done {
+            background: #e8f8f5;
+            color: #27ae60;
+        }
+
+        .task-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .task-actions button {
+            padding: 8px 12px;
+            font-size: 12px;
+            width: auto;
+            flex: 1;
+            min-width: 70px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .sprint-section {
+            background: white;
+            border-radius: 15px;
+            padding: 16px;
+            margin-top: 0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .sprint-section h2 {
+            font-size: 18px;
+            margin-bottom: 12px;
+        }
+
+        .sprint-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .sprint-controls input {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .sprint-controls button {
+            width: auto;
+            padding: 12px 20px;
+        }
+
+        .sprint-tasks {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .sprint-task {
+            background: #e8f8f5;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex: 1;
+            min-width: 120px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sprint-task:active {
+            transform: scale(0.98);
+        }
+
+        /* Team management */
+        .team-section {
+            background: white;
+            border-radius: 15px;
+            padding: 16px;
+            margin-top: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .team-section h2 {
+            font-size: 18px;
+            margin-bottom: 12px;
+        }
+
+        .members-list {
+            margin-top: 12px;
+            max-height: 50vh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .member-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            margin-bottom: 8px;
+            background: #f7f9fc;
+            border-radius: 10px;
+            border-left: 3px solid #667eea;
+        }
+
+        .member-info {
+            flex: 1;
+        }
+
+        .member-info strong {
+            font-size: 14px;
+        }
+
+        .member-role {
+            font-size: 11px;
+            color: #888;
+            margin-top: 3px;
+        }
+
+        .member-item button {
+            width: auto;
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .add-member-form {
+            margin-top: 16px;
+            padding: 16px;
+            background: #f7f9fc;
+            border-radius: 12px;
+        }
+
+        .add-member-form h3 {
+            font-size: 16px;
+            margin-bottom: 12px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .team-info {
+            font-size: 12px;
+            color: #888;
+            word-break: break-all;
+        }
+
+        .user-details {
+            font-size: 12px;
+            font-weight: normal;
+            word-break: break-word;
+        }
+
+        /* Адаптация для очень маленьких экранов */
+        @media (max-width: 480px) {
+            body {
+                padding: 8px;
+            }
+            
+            .header h1 {
+                font-size: 18px;
+            }
+            
+            .task-actions button {
+                font-size: 11px;
+                padding: 6px 10px;
+            }
+            
+            .sprint-controls {
+                flex-direction: column;
+            }
+            
+            .sprint-controls button {
+                width: 100%;
+            }
+            
+            .member-item {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .member-item button {
+                width: 100%;
+            }
+        }
+
+        /* Улучшенная прокрутка */
+        .task-list::-webkit-scrollbar,
+        .members-list::-webkit-scrollbar {
+            width: 4px;
+        }
+        
+        .task-list::-webkit-scrollbar-track,
+        .members-list::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        .task-list::-webkit-scrollbar-thumb,
+        .members-list::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- Модальное окно авторизации/создания команды -->
+        <div id="authModal" class="modal">
+            <div class="modal-content">
+                <h2>🏢 Создание команды</h2>
+                <div class="form-group">
+                    <label>Ваш никнейм *</label>
+                    <input type="text" id="userNickname" placeholder="Введите ваш никнейм">
+                </div>
+                <div class="form-group">
+                    <label>Ваш телефон *</label>
+                    <input type="tel" id="userPhone" placeholder="+7 (XXX) XXX-XX-XX">
+                </div>
+                <div class="form-group">
+                    <label>Роль в команде *</label>
+                    <select id="userRole">
+                        <option value="manager">👔 Руководитель</option>
+                        <option value="executor">👤 Исполнитель</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Название команды *</label>
+                    <input type="text" id="teamName" placeholder="Название вашей команды">
+                </div>
+                <button onclick="createTeam()" style="width: 100%;">🚀 Создать команду</button>
+                
+                <div style="margin-top: 20px; text-align: center;">
+                    <hr style="margin: 20px 0;">
+                    <p style="color: #888;">Уже есть команда?</p>
+                    <button onclick="showJoinTeam()" class="success" style="margin-top: 10px;">🔗 Войти в команду</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Основной интерфейс -->
+        <div id="mainApp" class="hidden">
+            <div class="container">
+                <div class="header">
+                    <div>
+                        <h1>📋 Трекер задач</h1>
+                        <div class="team-info" id="teamInfo"></div>
+                    </div>
+                    <div class="user-info">
+                        <span class="role-badge" id="roleBadge"></span>
+                        <div class="user-details" id="userInfo"></div>
+                        <button onclick="logout()" class="danger" style="width: auto; padding: 8px 16px;">🚪</button>
+                    </div>
+                </div>
+
+                <div class="main-content">
+                    <div class="task-section">
+                        <h2>➕ Создать задачу</h2>
+                        <form id="taskForm">
+                            <div class="form-group">
+                                <label>Название задачи *</label>
+                                <input type="text" id="taskTitle" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Описание</label>
+                                <textarea id="taskDesc" rows="3"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Срок выполнения</label>
+                                <input type="date" id="taskDue">
+                            </div>
+                            <div class="form-group" id="assigneeGroup">
+                                <label>Исполнитель</label>
+                                <select id="taskAssignee"></select>
+                            </div>
+                            <button type="submit">Создать задачу</button>
+                        </form>
+                    </div>
+
+                    <div class="task-section">
+                        <h2>📝 Все задачи</h2>
+                        <div id="taskList" class="task-list"></div>
+                    </div>
+                </div>
+
+                <div class="sprint-section">
+                    <h2>🏃 Спринт</h2>
+                    <div class="sprint-controls">
+                        <input type="text" id="sprintName" placeholder="Название спринта">
+                        <button onclick="updateSprint()">Обновить</button>
+                    </div>
+                    <div id="sprintInfo" style="margin-top: 5px; font-size: 13px;"></div>
+                    <div id="sprintTasks" class="sprint-tasks"></div>
+                </div>
+
+                <!-- Управление командой (только для руководителя) -->
+                <div id="teamManagement" class="team-section hidden">
+                    <h2>👥 Управление командой</h2>
+                    <div class="members-list" id="membersList"></div>
+                    
+                    <div class="add-member-form">
+                        <h3>➕ Добавить исполнителя</h3>
+                        <div class="form-group">
+                            <label>Никнейм исполнителя *</label>
+                            <input type="text" id="newMemberNickname" placeholder="Введите никнейм">
+                        </div>
+                        <div class="form-group">
+                            <label>Телефон исполнителя *</label>
+                            <input type="tel" id="newMemberPhone" placeholder="+7 (XXX) XXX-XX-XX">
+                        </div>
+                        <button onclick="addTeamMember()" class="success">Добавить в команду</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ========== Глобальные переменные ==========
+        let currentTeam = null;
+        let currentUser = null;
+        let tasks = [];
+        let sprint = { name: "Спринт 1", tasks: [] };
+
+        // ========== Управление командой ==========
+        function createTeam() {
+            const nickname = document.getElementById('userNickname').value.trim();
+            const phone = document.getElementById('userPhone').value.trim();
+            const role = document.getElementById('userRole').value;
+            const teamName = document.getElementById('teamName').value.trim();
+
+            if (!nickname || !phone || !teamName) {
+                alert('Пожалуйста, заполните все поля');
+                return;
+            }
+
+            const teamId = 'team_' + Date.now();
+            currentTeam = {
+                id: teamId,
+                name: teamName,
+                members: [{
+                    id: 'user_' + Date.now(),
+                    nickname: nickname,
+                    phone: phone,
+                    role: role,
+                    isOnline: true,
+                    addedBy: 'system'
+                }]
+            };
+
+            currentUser = currentTeam.members[0];
+            
+            saveTeamToLocalStorage();
+            initApp();
+        }
+
+        function showJoinTeam() {
+            const modalContent = document.querySelector('.modal-content');
+            modalContent.innerHTML = `
+                <h2>🔗 Вход в команду</h2>
+                <div class="form-group">
+                    <label>Ваш никнейм *</label>
+                    <input type="text" id="joinNickname" placeholder="Введите ваш никнейм">
+                </div>
+                <div class="form-group">
+                    <label>Ваш телефон *</label>
+                    <input type="tel" id="joinPhone" placeholder="+7 (XXX) XXX-XX-XX">
+                </div>
+                <div class="form-group">
+                    <label>Код команды *</label>
+                    <input type="text" id="teamCode" placeholder="Введите код команды">
+                </div>
+                <button onclick="joinTeam()" style="width: 100%;">🔗 Войти в команду</button>
+                <button onclick="location.reload()" style="width: 100%; margin-top: 10px;" class="secondary">◀ Назад</button>
+            `;
+        }
+
+        function joinTeam() {
+            const nickname = document.getElementById('joinNickname').value.trim();
+            const phone = document.getElementById('joinPhone').value.trim();
+            const teamCode = document.getElementById('teamCode').value.trim();
+
+            if (!nickname || !phone || !teamCode) {
+                alert('Пожалуйста, заполните все поля');
+                return;
+            }
+
+            const teams = getAllTeams();
+            const team = teams.find(t => t.id === teamCode);
+            
+            if (!team) {
+                alert('Команда не найдена. Проверьте код команды.');
+                return;
+            }
+
+            const existingUser = team.members.find(m => m.phone === phone);
+            if (existingUser) {
+                alert('Пользователь с таким телефоном уже в команде');
+                return;
+            }
+
+            currentTeam = team;
+            currentUser = {
+                id: 'user_' + Date.now(),
+                nickname: nickname,
+                phone: phone,
+                role: 'executor',
+                isOnline: true,
+                addedBy: 'self'
+            };
+            
+            currentTeam.members.push(currentUser);
+            saveTeamToLocalStorage();
+            initApp();
+        }
+
+        function addTeamMember() {
+            if (currentUser.role !== 'manager') {
+                alert('Только руководитель может добавлять участников');
+                return;
+            }
+
+            const nickname = document.getElementById('newMemberNickname').value.trim();
+            const phone = document.getElementById('newMemberPhone').value.trim();
+
+            if (!nickname || !phone) {
+                alert('Заполните все поля');
+                return;
+            }
+
+            const existingUser = currentTeam.members.find(m => m.phone === phone);
+            if (existingUser) {
+                alert('Пользователь с таким телефоном уже в команде');
+                return;
+            }
+
+            const newMember = {
+                id: 'user_' + Date.now(),
+                nickname: nickname,
+                phone: phone,
+                role: 'executor',
+                isOnline: true,
+                addedBy: currentUser.nickname,
+                addedAt: new Date().toISOString()
+            };
+
+            currentTeam.members.push(newMember);
+            saveTeamToLocalStorage();
+            
+            document.getElementById('newMemberNickname').value = '';
+            document.getElementById('newMemberPhone').value = '';
+            
+            updateUI();
+            renderAll();
+            renderTeamMembers();
+            
+            alert(`Исполнитель ${nickname} добавлен в команду!`);
+        }
+
+        function removeTeamMember(memberId) {
+            if (currentUser.role !== 'manager') {
+                alert('Только руководитель может удалять участников');
+                return;
+            }
+
+            const member = currentTeam.members.find(m => m.id === memberId);
+            if (!member) return;
+
+            if (member.role === 'manager') {
+                alert('Нельзя удалить руководителя команды');
+                return;
+            }
+
+            if (confirm(`Удалить ${member.nickname} из команды?`)) {
+                currentTeam.members = currentTeam.members.filter(m => m.id !== memberId);
+                
+                tasks.forEach(task => {
+                    if (task.assignee === member.nickname) {
+                        task.assignee = 'Не назначен';
+                    }
+                });
+                
+                saveTeamToLocalStorage();
+                saveAllData();
+                updateUI();
+                renderAll();
+                renderTeamMembers();
+                
+                alert(`Исполнитель ${member.nickname} удален из команды`);
+            }
+        }
+
+        function getAllTeams() {
+            const teams = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith('team_')) {
+                    const team = JSON.parse(localStorage.getItem(key));
+                    if (team) teams.push(team);
+                }
+            }
+            return teams;
+        }
+
+        function saveTeamToLocalStorage() {
+            if (currentTeam) {
+                localStorage.setItem(currentTeam.id, JSON.stringify(currentTeam));
+                localStorage.setItem('currentTeamId', currentTeam.id);
+                localStorage.setItem('currentUserId', currentUser.id);
+            }
+        }
+
+        function loadTeamFromLocalStorage() {
+            const teamId = localStorage.getItem('currentTeamId');
+            const userId = localStorage.getItem('currentUserId');
+            
+            if (teamId && userId) {
+                const team = JSON.parse(localStorage.getItem(teamId));
+                if (team) {
+                    currentTeam = team;
+                    currentUser = team.members.find(m => m.id === userId);
+                    
+                    if (!currentUser) {
+                        localStorage.removeItem('currentTeamId');
+                        localStorage.removeItem('currentUserId');
+                        return false;
+                    }
+                    
+                    const storedTasks = localStorage.getItem(`tasks_${teamId}`);
+                    if (storedTasks) tasks = JSON.parse(storedTasks);
+                    
+                    const storedSprint = localStorage.getItem(`sprint_${teamId}`);
+                    if (storedSprint) sprint = JSON.parse(storedSprint);
+                    
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // ========== Инициализация приложения ==========
+        function initApp() {
+            if (loadTeamFromLocalStorage()) {
+                document.getElementById('authModal').classList.add('hidden');
+                document.getElementById('mainApp').classList.remove('hidden');
+                updateUI();
+                renderAll();
+                if (currentUser.role === 'manager') {
+                    renderTeamMembers();
+                    document.getElementById('teamManagement').classList.remove('hidden');
+                }
+            }
+        }
+
+        function updateUI() {
+            const roleBadge = document.getElementById('roleBadge');
+            const userInfo = document.getElementById('userInfo');
+            const teamInfo = document.getElementById('teamInfo');
+            const assigneeSelect = document.getElementById('taskAssignee');
+            
+            if (currentUser.role === 'manager') {
+                roleBadge.textContent = '👔 Руководитель';
+                roleBadge.style.background = '#667eea';
+                document.getElementById('assigneeGroup').style.display = 'block';
+                
+                assigneeSelect.innerHTML = '<option value="">Выберите исполнителя</option>';
+                currentTeam.members.forEach(member => {
+                    if (member.id !== currentUser.id) {
+                        assigneeSelect.innerHTML += `<option value="${member.nickname}">${member.nickname}</option>`;
+                    }
+                });
+                assigneeSelect.innerHTML += `<option value="${currentUser.nickname}">${currentUser.nickname} (Я)</option>`;
+            } else {
+                roleBadge.textContent = '👤 Исполнитель';
+                roleBadge.style.background = '#48bb78';
+                document.getElementById('assigneeGroup').style.display = 'none';
+            }
+            
+            userInfo.textContent = `${currentUser.nickname}`;
+            teamInfo.innerHTML = `🏢 ${currentTeam.name}<br>🔑 Код: ${currentTeam.id}<br>👥 Участников: ${currentTeam.members.length}`;
+        }
+
+        function renderTeamMembers() {
+            const membersList = document.getElementById('membersList');
+            
+            if (!membersList) return;
+            
+            const managers = currentTeam.members.filter(m => m.role === 'manager');
+            const executors = currentTeam.members.filter(m => m.role === 'executor');
+            
+            membersList.innerHTML = `
+                <h3>👔 Руководители</h3>
+                ${managers.map(member => `
+                    <div class="member-item">
+                        <div class="member-info">
+                            <strong>${escapeHtml(member.nickname)}</strong>
+                            <div class="member-role">${member.phone}</div>
+                        </div>
+                    </div>
+                `).join('')}
+                
+                <h3 style="margin-top: 15px;">👤 Исполнители (${executors.length})</h3>
+                ${executors.map(member => `
+                    <div class="member-item">
+                        <div class="member-info">
+                            <strong>${escapeHtml(member.nickname)}</strong>
+                            <div class="member-role">${member.phone}</div>
+                            <div class="member-role">Добавлен: ${member.addedBy === 'self' ? 'самостоятельно' : member.addedBy}</div>
+                        </div>
+                        <button onclick="removeTeamMember('${member.id}')" class="danger">✖️</button>
+                    </div>
+                `).join('')}
+            `;
+        }
+
+        function saveAllData() {
+            localStorage.setItem(`tasks_${currentTeam.id}`, JSON.stringify(tasks));
+            localStorage.setItem(`sprint_${currentTeam.id}`, JSON.stringify(sprint));
+            saveTeamToLocalStorage();
+        }
+
+        // ========== Управление задачами ==========
+        function createTask() {
+            const title = document.getElementById('taskTitle').value;
+            const desc = document.getElementById('taskDesc').value;
+            const dueDate = document.getElementById('taskDue').value;
+            
+            if (!title) {
+                alert('Введите название задачи');
+                return;
+            }
+            
+            let assignee = '';
+            if (currentUser.role === 'manager') {
+                assignee = document.getElementById('taskAssignee').value;
+                if (!assignee) {
+                    alert('Выберите исполнителя');
+                    return;
+                }
+            } else {
+                assignee = currentUser.nickname;
+            }
+            
+            const newTask = {
+                id: Date.now().toString(),
+                title: title,
+                description: desc,
+                dueDate: dueDate,
+                status: 'in_progress',
+                assignee: assignee,
+                createdBy: currentUser.nickname,
+                createdByRole: currentUser.role,
+                createdAt: Date.now(),
+                updatedAt: Date.now()
+            };
+            
+            tasks.push(newTask);
+            saveAllData();
+            renderAll();
+            
+            document.getElementById('taskForm').reset();
+        }
+
+        function updateTaskStatus(taskId, newStatus) {
+            const task = tasks.find(t => t.id === taskId);
+            if (task) {
+                task.status = newStatus;
+                task.updatedAt = Date.now();
+                saveAllData();
+                renderAll();
+            }
+        }
+
+        function assignToSelf(taskId) {
+            const task = tasks.find(t => t.id === taskId);
+            if (task && currentUser.role === 'executor') {
+                task.assignee = currentUser.nickname;
+                task.updatedAt = Date.now();
+                saveAllData();
+                renderAll();
+            }
+        }
+
+        function deleteTask(taskId) {
+            if (confirm('Удалить задачу?')) {
+                tasks = tasks.filter(t => t.id !== taskId);
+                sprint.tasks = sprint.tasks.filter(id => id !== taskId);
+                saveAllData();
+                renderAll();
+            }
+        }
+
+        function addToSprint(taskId) {
+            if (!sprint.tasks.includes(taskId)) {
+                sprint.tasks.push(taskId);
+                saveAllData();
+                renderAll();
+            }
+        }
+
+        function removeFromSprint(taskId) {
+            sprint.tasks = sprint.tasks.filter(id => id !== taskId);
+            saveAllData();
+            renderAll();
+        }
+
+        function updateSprint() {
+            const newName = document.getElementById('sprintName').value;
+            if (newName) sprint.name = newName;
+            saveAllData();
+            renderAll();
+        }
+
+        function logout() {
+            localStorage.removeItem('currentTeamId');
+            localStorage.removeItem('currentUserId');
+            location.reload();
+        }
+
+        // ========== Рендеринг ==========
+        function renderAll() {
+            renderTaskList();
+            renderSprint();
+            if (currentUser.role === 'manager') {
+                renderTeamMembers();
+            }
+        }
+
+        function renderTaskList() {
+            const taskListDiv = document.getElementById('taskList');
+            
+            if (tasks.length === 0) {
+                taskListDiv.innerHTML = '<p style="text-align: center; color: #888; padding: 20px;">Нет задач. Создайте первую задачу!</p>';
+                return;
+            }
+            
+            let filteredTasks = tasks;
+            if (currentUser.role === 'executor') {
+                filteredTasks = tasks.filter(t => t.assignee === currentUser.nickname);
+            }
+            
+            taskListDiv.innerHTML = filteredTasks.map(task => `
+                <div class="task-card">
+                    <div class="task-title">${escapeHtml(task.title)}</div>
+                    <div class="task-description">${escapeHtml(task.description || 'Нет описания')}</div>
+                    <div class="task-meta">
+                        <div class="task-meta-row">
+                            <span>👤 ${escapeHtml(task.assignee)}</span>
+                            <span>👔 ${escapeHtml(task.createdBy)}</span>
+                        </div>
+                        <div class="task-meta-row">
+                            ${task.dueDate ? `<span class="task-due">📅 ${task.dueDate} ${isOverdue(task.dueDate) ? '⚠️' : ''}</span>` : ''}
+                            <span class="task-status ${task.status === 'in_progress' ? 'status-in-progress' : 'status-done'}">
+                                ${task.status === 'in_progress' ? 'В работе' : 'Выполнено'}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="task-actions">
+                        ${task.status === 'in_progress' ? 
+                            `<button onclick="updateTaskStatus('${task.id}', 'done')">✅ Завершить</button>` :
+                            `<button onclick="updateTaskStatus('${task.id}', 'in_progress')">🔄 Вернуть</button>`
+                        }
+                        ${currentUser.role === 'executor' && task.assignee !== currentUser.nickname && task.assignee !== 'Не назначен' ?
+                            `<button onclick="assignToSelf('${task.id}')">📌 Назначить себе</button>` : ''
+                        }
+                        ${(currentUser.role === 'manager' || task.createdBy === currentUser.nickname) ?
+                            `<button onclick="addToSprint('${task.id}')">🏃 В спринт</button>
+                             <button onclick="deleteTask('${task.id}')" class="danger">🗑️</button>` :
+                            ''
+                        }
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderSprint() {
+            const sprintInfo = document.getElementById('sprintInfo');
+            const sprintTasksDiv = document.getElementById('sprintTasks');
+            const sprintNameInput = document.getElementById('sprintName');
+            
+            sprintNameInput.value = sprint.name;
+            sprintInfo.innerHTML = `<strong>${escapeHtml(sprint.name)}</strong> | Задач: ${sprint.tasks.length}`;
+            
+            const sprintTaskObjects = sprint.tasks
+                .map(taskId => tasks.find(t => t.id === taskId))
+                .filter(task => task);
+            
+            if (sprintTaskObjects.length === 0) {
+                sprintTasksDiv.innerHTML = '<p style="color: #888; text-align: center;">Нет задач в спринте</p>';
+                return;
+            }
+            
+            sprintTasksDiv.innerHTML = sprintTaskObjects.map(task => `
+                <div class="sprint-task">
+                    <span><strong>${escapeHtml(task.title)}</strong><br><small>${task.status === 'in_progress' ? 'В работе' : 'Выполнено'}</small></span>
+                    <button onclick="removeFromSprint('${task.id}')" class="danger" style="width: auto; padding: 4px 8px;">✖️</button>
+                </div>
+            `).join('');
+        }
+
+        function isOverdue(dueDate) {
+            if (!dueDate) return false;
+            const today = new Date().toISOString().split('T')[0];
+            return dueDate < today;
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        // Настройка обработчиков событий
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('taskForm')?.addEventListener('submit', (e) => {
+                e.preventDefault();
+                createTask();
+            });
+            initApp();
+        });
+    </script>
+</body>
+</html>
