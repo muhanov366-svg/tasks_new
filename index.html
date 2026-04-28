@@ -643,29 +643,32 @@
             saveTeamToLocalStorage();
             initApp();
         }
+function showJoinTeam() {
+    const modalContent = document.querySelector('.modal-content');
+    modalContent.innerHTML = `
+        <h2>🔗 Вход в команду</h2>
+        <div class="form-group">
+            <label>Ваш никнейм *</label>
+            <input type="text" id="joinNickname" placeholder="Введите ваш никнейм">
+        </div>
+        <div class="form-group">
+            <label>Ваш телефон *</label>
+            <input type="tel" id="joinPhone" placeholder="+7 (XXX) XXX-XX-XX">
+        </div>
+        <div class="form-group">
+            <label>Код команды *</label>
+            <input type="text" id="teamCode" placeholder="Введите код команды">
+        </div>
+        <p style="color: #888; font-size: 12px; margin-top: 8px;">
+            Код команды вам должен передать руководитель.
+        </p>
+        <button onclick="joinTeam()" style="width: 100%;">🔗 Войти в команду</button>
+        <button onclick="location.reload()" style="width: 100%; margin-top: 10px;" class="secondary">◀ Назад</button>
+    `;
+}
 
-        function showJoinTeam() {
-            const modalContent = document.querySelector('.modal-content');
-            modalContent.innerHTML = `
-                <h2>🔗 Вход в команду</h2>
-                <div class="form-group">
-                    <label>Ваш никнейм *</label>
-                    <input type="text" id="joinNickname" placeholder="Введите ваш никнейм">
-                </div>
-                <div class="form-group">
-                    <label>Ваш телефон *</label>
-                    <input type="tel" id="joinPhone" placeholder="+7 (XXX) XXX-XX-XX">
-                </div>
-                <div class="form-group">
-                    <label>Код команды *</label>
-                    <input type="text" id="teamCode" placeholder="Введите код команды">
-                </div>
-                <button onclick="joinTeam()" style="width: 100%;">🔗 Войти в команду</button>
-                <button onclick="location.reload()" style="width: 100%; margin-top: 10px;" class="secondary">◀ Назад</button>
-            `;
-        }
 
-        function joinTeam() {
+    function joinTeam() {
     const nickname = document.getElementById('joinNickname').value.trim();
     const phone = document.getElementById('joinPhone').value.trim();
     const teamCode = document.getElementById('teamCode').value.trim();
@@ -683,40 +686,39 @@
         return;
     }
 
-    // Ищем существующего пользователя по телефону
-    const existingUser = team.members.find(m => m.phone === phone);
+    // Ищем пользователя по телефону именно в этой команде
+    const memberInTeam = team.members.find(m => m.phone === phone);
 
-    if (existingUser) {
-        // Если пользователь уже есть — просто авторизуем его
+    if (memberInTeam) {
+        // Пользователь найден в команде — авторизуем его
         currentTeam = team;
-        currentUser = existingUser;
+        currentUser = memberInTeam;
 
         // Обновляем никнейм, если он изменился
-        if (existingUser.nickname !== nickname) {
-            existingUser.nickname = nickname;
+        if (memberInTeam.nickname !== nickname) {
+            memberInTeam.nickname = nickname;
             saveTeamToLocalStorage();
         }
 
-        saveTeamToLocalStorage(); // Сохраняем изменения, если меняли никнейм
         initApp();
         return;
     }
 
-    // Если пользователя нет — создаём нового
-    currentTeam = team;
-    currentUser = {
-        id: 'user_' + Date.now(),
-        nickname: nickname,
-        phone: phone,
-        role: 'executor',
-        isOnline: true,
-        addedBy: 'self'
-    };
+    // Если пользователя нет в команде, предлагаем создать новую
+    const createNew = confirm(
+        'Пользователь с таким телефоном не найден в команде.\n\n' +
+        'Хотите создать новую команду с этими данными?';
 
-    currentTeam.members.push(currentUser);
-    saveTeamToLocalStorage();
-    initApp();
+    if (createNew) {
+        createTeam();
+    } else {
+        alert('Для входа в команду убедитесь, что:\n' +
+              '1. Код команды введён верно\n' +
+              '2. Ваш телефон указан в команде руководителем\n' +
+              '3. Руководитель передал вам правильный код команды');
+    }
 }
+
 
 function addTeamMember() {
     if (currentUser.role !== 'manager') {
@@ -760,7 +762,12 @@ function addTeamMember() {
     renderAll();
     renderTeamMembers();
 
-    alert(`Исполнитель ${nickname} добавлен в команду!`);
+    // Показываем сообщение с кодом команды
+    alert(`Исполнитель ${nickname} добавлен в команду!\n\n` +
+          `Код команды: ${currentTeam.id}\n` +
+          `Никнейм: ${nickname}\n` +
+          `Телефон: ${phone}\n\n` +
+          `Передайте эти данные исполнителю для входа.`);
 }
 
 
