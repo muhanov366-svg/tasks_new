@@ -444,6 +444,44 @@
             background: #888;
             border-radius: 10px;
         }
+
+        .team-card {
+    background: white;
+    padding: 12px;
+    margin: 8px 0;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.modal {
+    display: flex;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+    padding: 16px;
+}
+
+.modal.hidden {
+    display: none;
+}
+.assignee-group {
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 15px;
+    background: #f9f9f9;
+}
+
+.tasks-for-assignee {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
     </style>
 </head>
 <body>
@@ -478,6 +516,12 @@
                     <p style="color: #888;">Уже есть команда?</p>
                     <button onclick="showJoinTeam()" class="success" style="margin-top: 10px;">🔗 Войти в команду</button>
                 </div>
+                <div style="margin-top: 20px; text-align: center;">
+    <hr style="margin: 20px 0;">
+    <p style="color: #888;">Уже есть команда?</p>
+    <button onclick="showJoinTeam()" class="success" style="margin-top: 10px;">🔗 Войти в команду</button>
+</div>
+
             </div>
         </div>
 
@@ -541,6 +585,9 @@
                     <h2>👥 Управление командой</h2>
                     <div class="members-list" id="membersList"></div>
                     
+                    <button onclick="showAvailableTeams()" class="secondary" style="margin-top: 15px;">
+                        👥 Просмотреть все команды
+                    </button>
                     <div class="add-member-form">
                         <h3>➕ Добавить исполнителя</h3>
                         <div class="form-group">
@@ -619,86 +666,103 @@
         }
 
         function joinTeam() {
-            const nickname = document.getElementById('joinNickname').value.trim();
-            const phone = document.getElementById('joinPhone').value.trim();
-            const teamCode = document.getElementById('teamCode').value.trim();
+    const nickname = document.getElementById('joinNickname').value.trim();
+    const phone = document.getElementById('joinPhone').value.trim();
+    const teamCode = document.getElementById('teamCode').value.trim();
 
-            if (!nickname || !phone || !teamCode) {
-                alert('Пожалуйста, заполните все поля');
-                return;
-            }
+    if (!nickname || !phone || !teamCode) {
+        alert('Пожалуйста, заполните все поля');
+        return;
+    }
 
-            const teams = getAllTeams();
-            const team = teams.find(t => t.id === teamCode);
-            
-            if (!team) {
-                alert('Команда не найдена. Проверьте код команды.');
-                return;
-            }
+    const teams = getAllTeams();
+    const team = teams.find(t => t.id === teamCode);
 
-            const existingUser = team.members.find(m => m.phone === phone);
-            if (existingUser) {
-                alert('Пользователь с таким телефоном уже в команде');
-                return;
-            }
+    if (!team) {
+        alert('Команда не найдена. Проверьте код команды.');
+        return;
+    }
 
-            currentTeam = team;
-            currentUser = {
-                id: 'user_' + Date.now(),
-                nickname: nickname,
-                phone: phone,
-                role: 'executor',
-                isOnline: true,
-                addedBy: 'self'
-            };
-            
-            currentTeam.members.push(currentUser);
+    // Ищем существующего пользователя по телефону
+    const existingUser = team.members.find(m => m.phone === phone);
+
+    if (existingUser) {
+        // Если пользователь уже есть — просто авторизуем его
+        currentTeam = team;
+        currentUser = existingUser;
+
+        // Обновляем никнейм, если он изменился
+        if (existingUser.nickname !== nickname) {
+            existingUser.nickname = nickname;
             saveTeamToLocalStorage();
-            initApp();
         }
 
-        function addTeamMember() {
-            if (currentUser.role !== 'manager') {
-                alert('Только руководитель может добавлять участников');
-                return;
-            }
+        saveTeamToLocalStorage(); // Сохраняем изменения, если меняли никнейм
+        initApp();
+        return;
+    }
 
-            const nickname = document.getElementById('newMemberNickname').value.trim();
-            const phone = document.getElementById('newMemberPhone').value.trim();
+    // Если пользователя нет — создаём нового
+    currentTeam = team;
+    currentUser = {
+        id: 'user_' + Date.now(),
+        nickname: nickname,
+        phone: phone,
+        role: 'executor',
+        isOnline: true,
+        addedBy: 'self'
+    };
 
-            if (!nickname || !phone) {
-                alert('Заполните все поля');
-                return;
-            }
+    currentTeam.members.push(currentUser);
+    saveTeamToLocalStorage();
+    initApp();
+}
 
-            const existingUser = currentTeam.members.find(m => m.phone === phone);
-            if (existingUser) {
-                alert('Пользователь с таким телефоном уже в команде');
-                return;
-            }
+function addTeamMember() {
+    if (currentUser.role !== 'manager') {
+        alert('Только руководитель может добавлять участников');
+        return;
+    }
 
-            const newMember = {
-                id: 'user_' + Date.now(),
-                nickname: nickname,
-                phone: phone,
-                role: 'executor',
-                isOnline: true,
-                addedBy: currentUser.nickname,
-                addedAt: new Date().toISOString()
-            };
+    const nickname = document.getElementById('newMemberNickname').value.trim();
+    const phone = document.getElementById('newMemberPhone').value.trim();
 
-            currentTeam.members.push(newMember);
-            saveTeamToLocalStorage();
-            
-            document.getElementById('newMemberNickname').value = '';
-            document.getElementById('newMemberPhone').value = '';
-            
-            updateUI();
-            renderAll();
-            renderTeamMembers();
-            
-            alert(`Исполнитель ${nickname} добавлен в команду!`);
-        }
+    if (!nickname || !phone) {
+        alert('Заполните все поля');
+        return;
+    }
+
+    // Проверка на дубликат по телефону
+    const existingUser = currentTeam.members.find(m => m.phone === phone);
+    if (existingUser) {
+        alert('Пользователь с таким телефоном уже в команде');
+        return;
+    }
+
+    const newMember = {
+        id: 'user_' + Date.now(),
+        nickname: nickname,
+        phone: phone,
+        role: 'executor',
+        isOnline: true,
+        addedBy: currentUser.nickname,
+        addedAt: new Date().toISOString()
+    };
+
+    currentTeam.members.push(newMember);
+    saveTeamToLocalStorage();
+
+    // Очищаем поля формы
+    document.getElementById('newMemberNickname').value = '';
+    document.getElementById('newMemberPhone').value = '';
+
+    updateUI();
+    renderAll();
+    renderTeamMembers();
+
+    alert(`Исполнитель ${nickname} добавлен в команду!`);
+}
+
 
         function removeTeamMember(memberId) {
             if (currentUser.role !== 'manager') {
@@ -954,11 +1018,13 @@
             renderAll();
         }
 
-        function logout() {
-            localStorage.removeItem('currentTeamId');
-            localStorage.removeItem('currentUserId');
-            location.reload();
-        }
+      function logout() {
+    localStorage.removeItem('currentTeamId');
+    localStorage.removeItem('currentUserId');
+    // Не удаляем данные команды — они нужны для повторного входа
+    location.reload();
+}
+
 
         // ========== Рендеринг ==========
         function renderAll() {
@@ -970,51 +1036,63 @@
         }
 
         function renderTaskList() {
-            const taskListDiv = document.getElementById('taskList');
-            
-            if (tasks.length === 0) {
-                taskListDiv.innerHTML = '<p style="text-align: center; color: #888; padding: 20px;">Нет задач. Создайте первую задачу!</p>';
-                return;
-            }
-            
-            let filteredTasks = tasks;
-            if (currentUser.role === 'executor') {
-                filteredTasks = tasks.filter(t => t.assignee === currentUser.nickname);
-            }
-            
-            taskListDiv.innerHTML = filteredTasks.map(task => `
+    const taskListDiv = document.getElementById('taskList');
+    const groupedTasks = groupTasksByAssignee();
+
+    let html = '';
+
+    Object.keys(groupedTasks).forEach(assignee => {
+        const tasksForAssignee = groupedTasks[assignee];
+
+        html += `
+            <div class="assignee-group" style="margin-bottom: 20px;">
+                <h3 style="color: #333; font-size: 16px; margin-bottom: 10px;">👤 ${escapeHtml(assignee)}</h3>
+                <div class="tasks-for-assignee">
+        `;
+
+        tasksForAssignee.forEach(task => {
+            html += `
                 <div class="task-card">
                     <div class="task-title">${escapeHtml(task.title)}</div>
                     <div class="task-description">${escapeHtml(task.description || 'Нет описания')}</div>
                     <div class="task-meta">
-                        <div class="task-meta-row">
-                            <span>👤 ${escapeHtml(task.assignee)}</span>
-                            <span>👔 ${escapeHtml(task.createdBy)}</span>
-                        </div>
-                        <div class="task-meta-row">
-                            ${task.dueDate ? `<span class="task-due">📅 ${task.dueDate} ${isOverdue(task.dueDate) ? '⚠️' : ''}</span>` : ''}
-                            <span class="task-status ${task.status === 'in_progress' ? 'status-in-progress' : 'status-done'}">
-                                ${task.status === 'in_progress' ? 'В работе' : 'Выполнено'}
-                            </span>
-                        </div>
-                    </div>
-                    <div class="task-actions">
-                        ${task.status === 'in_progress' ? 
-                            `<button onclick="updateTaskStatus('${task.id}', 'done')">✅ Завершить</button>` :
-                            `<button onclick="updateTaskStatus('${task.id}', 'in_progress')">🔄 Вернуть</button>`
-                        }
-                        ${currentUser.role === 'executor' && task.assignee !== currentUser.nickname && task.assignee !== 'Не назначен' ?
-                            `<button onclick="assignToSelf('${task.id}')">📌 Назначить себе</button>` : ''
-                        }
-                        ${(currentUser.role === 'manager' || task.createdBy === currentUser.nickname) ?
-                            `<button onclick="addToSprint('${task.id}')">🏃 В спринт</button>
-                             <button onclick="deleteTask('${task.id}')" class="danger">🗑️</button>` :
-                            ''
-                        }
-                    </div>
+                <div class="task-meta-row">
+                    <span>👔 ${escapeHtml(task.createdBy)}</span>
                 </div>
-            `).join('');
+                <div class="task-meta-row">
+                    ${task.dueDate ? `<span class="task-due">📅 ${task.dueDate} ${isOverdue(task.dueDate) ? '⚠️' : ''}</span>` : ''}
+            <span class="task-status ${task.status === 'in_progress' ? 'status-in-progress' : 'status-done'}">
+                ${task.status === 'in_progress' ? 'В работе' : 'Выполнено'}
+            </span>
+        </div>
+            </div>
+            <div class="task-actions">
+                ${task.status === 'in_progress' ?
+                    `<button onclick="updateTaskStatus('${task.id}', 'done')">✅ Завершить</button>` :
+            `<button onclick="updateTaskStatus('${task.id}', 'in_progress')">🔄 Вернуть</button>`
         }
+        ${currentUser.role === 'executor' && task.assignee !== currentUser.nickname && task.assignee !== 'Не назначен' ?
+            `<button onclick="assignToSelf('${task.id}')">📌 Назначить себе</button>` : ''
+        }
+        ${(currentUser.role === 'manager' || task.createdBy === currentUser.nickname) ?
+            `<button onclick="addToSprint('${task.id}')">🏃 В спринт</button>
+             <button onclick="deleteTask('${task.id}')" class="danger">🗑️</button>` :
+            ''
+        }
+            </div>
+        </div>
+            `;
+        });
+
+        html += `</div></div>`;
+    });
+
+    if (html === '') {
+        taskListDiv.innerHTML = '<p style="text-align: center; color: #888; padding: 20px;">Нет задач. Создайте первую задачу!</p>';
+    } else {
+        taskListDiv.innerHTML = html;
+    }
+}
 
         function renderSprint() {
             const sprintInfo = document.getElementById('sprintInfo');
@@ -1065,6 +1143,84 @@
             });
             initApp();
         });
+
+        function showAvailableTeams() {
+    const teams = getAllTeams();
+    
+    if (teams.length === 0) {
+        alert('Команды не найдены');
+        return;
+    }
+
+    let teamsList = '<h3>🏢 Доступные команды</h3>';
+    teams.forEach(team => {
+        teamsList += `
+            <div class="team-card" style="background: white; padding: 12px; margin: 8px 0; border-radius: 10px;">
+                <strong>${escapeHtml(team.name)}</strong><br>
+                <small>Код: ${team.id}</small><br>
+                <small>Участников: ${team.members.length}</small>
+            </div>
+        `;
+    });
+
+    // Показываем модальное окно с командами
+    showTeamsModal(teamsList);
+}
+
+function showTeamsModal(content) {
+    let modal = document.getElementById('teamsModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'teamsModal';
+        modal.className = 'modal';
+        document.body.appendChild(modal);
+    }
+
+    modal.innerHTML = `
+        <div class="modal-content">
+            <h2>👥 Все команды</h2>
+            ${content}
+            <button onclick="closeTeamsModal()" style="margin-top: 15px;" class="secondary">Закрыть</button>
+        </div>
+    `;
+    modal.classList.remove('hidden');
+}
+
+function closeTeamsModal() {
+    document.getElementById('teamsModal').classList.add('hidden');
+}
+
+function getAllTeams(excludeCurrent = true) {
+    const teams = [];
+    const currentTeamId = localStorage.getItem('currentTeamId');
+
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('team_')) {
+            // Пропускаем текущую команду, если нужно
+            if (excludeCurrent && key === currentTeamId) continue;
+
+            const team = JSON.parse(localStorage.getItem(key));
+            if (team) teams.push(team);
+        }
+    }
+    return teams;
+}
+function groupTasksByAssignee() {
+    const groupedTasks = {};
+
+    tasks.forEach(task => {
+        const assignee = task.assignee || 'Не назначен';
+
+        if (!groupedTasks[assignee]) {
+            groupedTasks[assignee] = [];
+        }
+
+        groupedTasks[assignee].push(task);
+    });
+
+    return groupedTasks;
+}
     </script>
 </body>
 </html>
