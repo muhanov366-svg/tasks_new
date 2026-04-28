@@ -263,7 +263,8 @@
             background: white;
             border-radius: 15px;
             padding: 16px;
-            margin-top: 0;
+            margin-top:
+            0;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
 
@@ -446,42 +447,29 @@
         }
 
         .team-card {
-    background: white;
-    padding: 12px;
-    margin: 8px 0;
-    border-radius: 10px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
+            background: white;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
 
-.modal {
-    display: flex;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.5);
-    z-index: 1000;
-    justify-content: center;
-    align-items: center;
-    padding: 16px;
-}
+        .modal.hidden {
+            display: none;
+        }
 
-.modal.hidden {
-    display: none;
-}
-.assignee-group {
-    border: 1px solid #e0e0e0;
-    border-radius: 12px;
-    padding: 15px;
-    background: #f9f9f9;
-}
+        .assignee-group {
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 15px;
+            background: #f9f9f9;
+        }
 
-.tasks-for-assignee {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
+        .tasks-for-assignee {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
     </style>
 </head>
 <body>
@@ -512,11 +500,10 @@
                 <button onclick="createTeam()" style="width: 100%;">🚀 Создать команду</button>
                 
                 <div style="margin-top: 20px; text-align: center;">
-    <hr style="margin: 20px 0;">
-    <p style="color: #888;">Уже есть команда?</p>
-    <button onclick="showJoinTeam()" class="success" style="margin-top: 10px;">🔗 Войти в команду</button>
-</div>
-
+                    <hr style="margin: 20px 0;">
+                    <p style="color: #888;">Уже есть команда?</p>
+                    <button onclick="showJoinTeam()" class="success" style="margin-top: 10px;">🔗 Войти в команду</button>
+                </div>
             </div>
         </div>
 
@@ -525,704 +512,162 @@
             <div class="container">
                 <div class="header">
                     <div>
-                        <h1>📋 Трекер задач</h1>
-                        <div class="team-info" id="teamInfo"></div>
-                    </div>
-                    <div class="user-info">
-                        <span class="role-badge" id="roleBadge"></span>
-                        <div class="user-details" id="userInfo"></div>
-                        <button onclick="logout()" class="danger" style="width: auto; padding: 8px 16px;">🚪</button>
-                    </div>
-                </div>
-
-                <div class="main-content">
-                    <div class="task-section">
-                        <h2>➕ Создать задачу</h2>
-                        <form id="taskForm">
-                            <div class="form-group">
-                                <label>Название задачи *</label>
-                                <input type="text" id="taskTitle" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Описание</label>
-                                <textarea id="taskDesc" rows="3"></textarea>
-                            </div>
-                            <div class="form-group">
-                                <label>Срок выполнения</label>
-                                <input type="date" id="taskDue">
-                            </div>
-                            <div class="form-group" id="assigneeGroup">
-                                <label>Исполнитель</label>
-                                <select id="taskAssignee"></select>
-                            </div>
-                            <button type="submit">Создать задачу</button>
-                        </form>
-                    </div>
-
-                    <div class="task-section">
-                        <h2>📝 Все задачи</h2>
-                        <div id="taskList" class="task-list"></div>
-                    </div>
-                </div>
-
-                <div class="sprint-section">
-                    <h2>🏃 Спринт</h2>
-                    <div class="sprint-controls">
-                        <input type="text" id="sprintName" placeholder="Название спринта">
-                        <button onclick="updateSprint()">Обновить</button>
-                    </div>
-                    <div id="sprintInfo" style="margin-top: 5px; font-size: 13px;"></div>
-                    <div id="sprintTasks" class="sprint-tasks"></div>
-                </div>
-
-                <!-- Управление командой (только для руководителя) -->
-                <div id="teamManagement" class="team-section hidden">
-                    <h2>👥 Управление командой</h2>
-                    <div class="members-list" id="membersList"></div>
-                    
-                    <button onclick="showAvailableTeams()" class="secondary" style="margin-top: 15px;">
-                        👥 Просмотреть все команды
-                    </button>
-                    <div class="add-member-form">
-                        <h3>➕ Добавить исполнителя</h3>
-                        <div class="form-group">
-                            <label>Никнейм исполнителя *</label>
-                            <input type="text" id="newMemberNickname" placeholder="Введите никнейм">
-                        </div>
-                        <div class="form-group">
-                            <label>Телефон исполнителя *</label>
-                            <input type="tel" id="newMemberPhone" placeholder="+7 (XXX) XXX-XX-XX">
-                        </div>
-                        <button onclick="addTeamMember()" class="success">Добавить в команду</button>
-                    </div>
-                </div>
+                <h1>📋 Трекер задач</h1>
+                <div class="team-info" id="teamInfo"></div>
             </div>
-        </div>
-    </div>
+            <div class="user-info">
+                <span class="role-badge" id="roleBadge"></span>
+                <div class="user-details" id="userInfo"></div>
+                <button onclick="logout()" class="danger" style="width: auto; padding: 8px 16px;">🚪</button>
+</div>
+</div>
 
-    <script>
-        // ========== Глобальные переменные ==========
-        let currentTeam = null;
-        let currentUser = null;
-        let tasks = [];
-        let sprint = { name: "Спринт 1", tasks: [] };
+<div class=“main-content”>
+<div class=“task-section”>
+<h2>➕ Создать задачу</h2>
+<form id=“taskForm”>
+<div class=“form-group”>
+<label>Название задачи *</label>
+<input type=“text” id=“taskTitle” required>
+</div>
+<div class=“form-group”>
+<label>Описание</label>
+<textarea id=“taskDesc” rows=“3”></textarea>
+</div>
+<div class=“form-group”>
+<label>Срок выполнения</label>
+<input type=“date” id=“taskDue”>
+</div>
+<div class=“form-group”>
+<label>Исполнитель</label>
+<select id=“taskAssignee”>
+<!-- Опции будут добавляться динамически -->
+</select>
+</div>
+<div class=“form-group”>
+<label>Приоритет</label>
+<select id=“taskPriority”>
+<option value=“low”>Низкий</option>
+<option value=“medium” selected>Средний</option>
+<option value=“high”>Высокий</option>
+</select>
+</div>
+<button type=“submit” class=“success”>✅ Создать задачу</button>
+</form>
+</div>
 
-        // ========== Управление командой ==========
-        function createTeam() {
-            const nickname = document.getElementById('userNickname').value.trim();
-            const phone = document.getElementById('userPhone').value.trim();
-            const role = document.getElementById('userRole').value;
-            const teamName = document.getElementById('teamName').value.trim();
+<div class=“task-section”>
+<h2>📋 Активные задачи</h2>
+<div class=“task-list” id=“activeTasksList”>
+<!-- Список задач будет добавляться динамически -->
+<p class=“empty-state”>Нет активных задач</p>
+</div>
+</div>
 
-            if (!nickname || !phone || !teamName) {
-                alert('Пожалуйста, заполните все поля');
-                return;
-            }
+<div class=“sprint-section”>
+<h2>🏃 Спринты</h2>
+<div class=“sprint-controls”>
+<input type=“text” placeholder=“Название спринта” id=“sprintName”>
+<input type=“date” id=“sprintStart”>
+<input type=“date” id=“sprintEnd”>
+<button onclick=“createSprint()” class=“primary”>➕ Создать спринт</button>
+</div>
+<div class=“sprint-tasks” id=“sprintsContainer”>
+<!-- Спринты будут добавляться динамически -->
+</div>
+</div>
 
-            const teamId = 'team_' + Date.now();
-            currentTeam = {
-                id: teamId,
-                name: teamName,
-                members: [{
-                    id: 'user_' + Date.now(),
-                    nickname: nickname,
-                    phone: phone,
-                    role: role,
-                    isOnline: true,
-                    addedBy: 'system'
-                }]
-            };
+<div class=“team-section”>
+<h2>👨‍👩‍👦 Управление командой</h2>
+<div class=“members-list” id=“membersList”>
+<!-- Члены команды будут добавляться динамически -->
+</div>
+<div class=“add-member-form”>
+<h3>➕ Добавить участника</h3>
+<div class=“form-group”>
+<label>Имя участника</label>
+<input type=“text” id=“memberName” placeholder=“Введите имя”>
+</div>
+<div class=“form-group”>
+<label>Роль</label>
+<select id=“memberRole”>
+<option value=“manager”>Руководитель</option>
+<option value=“executor” selected>Исполнитель</option>
+</select>
+</div>
+<button onclick=“addMember()” class=“success”>➕ Добавить</button>
+</div>
+</div>
+</div>
+</div>
 
-            currentUser = currentTeam.members[0];
-            
-            saveTeamToLocalStorage();
-            initApp();
-        }
+<script>
+// Базовые функции приложения
+function createTeam() {
+const nickname = document.getElementById(‘userNickname’).value;
+const phone = document.getElementById(‘userPhone’).value;
+const role = document.getElementById(‘userRole’).value;
+const teamName = document.getElementById(‘teamName’).value;
+
+if (!nickname || !phone || !teamName) {
+alert(‘Заполните все обязательные поля’);
+return;
+}
+
+// Здесь будет логика создания команды
+document.getElementById(‘authModal’).classList.add(‘hidden’);
+document.getElementById(‘mainApp’).classList.remove(‘hidden’);
+
+// Обновление интерфейса
+document.getElementById(‘teamInfo’).textContent = Команда: ${teamName};
+document.getElementById(‘userInfo’).textContent = Никнейм: ${nickname}, Телефон: ${phone};
+
+const roleText = role === ‘manager’ ? ‘Руководитель’ : ‘Исполнитель’;
+document.getElementById(‘roleBadge’).textContent = roleText;
+}
+
 function showJoinTeam() {
-    const modalContent = document.querySelector('.modal-content');
-    modalContent.innerHTML = `
-        <h2>🔗 Вход в команду</h2>
-        <div class="form-group">
-            <label>Ваш никнейм *</label>
-            <input type="text" id="joinNickname" placeholder="Введите ваш никнейм">
-        </div>
-        <div class="form-group">
-            <label>Ваш телефон *</label>
-            <input type="tel" id="joinPhone" placeholder="+7 (XXX) XXX-XX-XX">
-        </div>
-        <div class="form-group">
-            <label>Код команды *</label>
-            <input type="text" id="teamCode" placeholder="Введите код команды">
-        </div>
-        <p style="color: #888; font-size: 12px; margin-top: 8px;">
-            Код команды вам должен передать руководитель.
-        </p>
-        <button onclick="joinTeam()" style="width: 100%;">🔗 Войти в команду</button>
-        <button onclick="location.reload()" style="width: 100%; margin-top: 10px;" class="secondary">◀ Назад</button>
-    `;
+alert(‘Функция входа в команду будет реализована позже’);
 }
 
-
-    function joinTeam() {
-    const nickname = document.getElementById('joinNickname').value.trim();
-    const phone = document.getElementById('joinPhone').value.trim();
-    const teamCode = document.getElementById('teamCode').value.trim();
-
-    if (!nickname || !phone || !teamCode) {
-        alert('Пожалуйста, заполните все поля');
-        return;
-    }
-
-    const teams = getAllTeams();
-    const team = teams.find(t => t.id === teamCode);
-
-    if (!team) {
-        alert('Команда не найдена. Проверьте код команды.');
-        return;
-    }
-
-    // Ищем пользователя по телефону именно в этой команде
-    const memberInTeam = team.members.find(m => m.phone === phone);
-
-    if (memberInTeam) {
-        // Пользователь найден в команде — авторизуем его
-        currentTeam = team;
-        currentUser = memberInTeam;
-
-        // Обновляем никнейм, если он изменился
-        if (memberInTeam.nickname !== nickname) {
-            memberInTeam.nickname = nickname;
-            saveTeamToLocalStorage();
-        }
-
-        initApp();
-        return;
-    }
-
-    // Если пользователя нет в команде, предлагаем создать новую
-    const createNew = confirm(
-        'Пользователь с таким телефоном не найден в команде.\n\n' +
-        'Хотите создать новую команду с этими данными?';
-
-    if (createNew) {
-        createTeam();
-    } else {
-        alert('Для входа в команду убедитесь, что:\n' +
-              '1. Код команды введён верно\n' +
-              '2. Ваш телефон указан в команде руководителем\n' +
-              '3. Руководитель передал вам правильный код команды');
-    }
+function logout() {
+document.getElementById(‘mainApp’).classList.add(‘hidden’);
+document.getElementById(‘authModal’).classList.remove(‘hidden’);
 }
 
+function createSprint() {
+const sprintName = document.getElementById(‘sprintName’).value;
+const startDate = document.getElementById(‘sprintStart’).value;
+const endDate = document.getElementById(‘sprintEnd’).value;
 
-function addTeamMember() {
-    if (currentUser.role !== 'manager') {
-        alert('Только руководитель может добавлять участников');
-        return;
-    }
-
-    const nickname = document.getElementById('newMemberNickname').value.trim();
-    const phone = document.getElementById('newMemberPhone').value.trim();
-
-    if (!nickname || !phone) {
-        alert('Заполните все поля');
-        return;
-    }
-
-    // Проверка на дубликат по телефону
-    const existingUser = currentTeam.members.find(m => m.phone === phone);
-    if (existingUser) {
-        alert('Пользователь с таким телефоном уже в команде');
-        return;
-    }
-
-    const newMember = {
-        id: 'user_' + Date.now(),
-        nickname: nickname,
-        phone: phone,
-        role: 'executor',
-        isOnline: true,
-        addedBy: currentUser.nickname,
-        addedAt: new Date().toISOString()
-    };
-
-    currentTeam.members.push(newMember);
-    saveTeamToLocalStorage();
-
-    // Очищаем поля формы
-    document.getElementById('newMemberNickname').value = '';
-    document.getElementById('newMemberPhone').value = '';
-
-    updateUI();
-    renderAll();
-    renderTeamMembers();
-
-    // Показываем сообщение с кодом команды
-    alert(`Исполнитель ${nickname} добавлен в команду!\n\n` +
-          `Код команды: ${currentTeam.id}\n` +
-          `Никнейм: ${nickname}\n` +
-          `Телефон: ${phone}\n\n` +
-          `Передайте эти данные исполнителю для входа.`);
+if (!sprintName || !startDate || !endDate) {
+alert(‘Заполните все поля спринта’);
+return;
 }
 
-
-        function removeTeamMember(memberId) {
-            if (currentUser.role !== 'manager') {
-                alert('Только руководитель может удалять участников');
-                return;
-            }
-
-            const member = currentTeam.members.find(m => m.id === memberId);
-            if (!member) return;
-
-            if (member.role === 'manager') {
-                alert('Нельзя удалить руководителя команды');
-                return;
-            }
-
-            if (confirm(`Удалить ${member.nickname} из команды?`)) {
-                currentTeam.members = currentTeam.members.filter(m => m.id !== memberId);
-                
-                tasks.forEach(task => {
-                    if (task.assignee === member.nickname) {
-                        task.assignee = 'Не назначен';
-                    }
-                });
-                
-                saveTeamToLocalStorage();
-                saveAllData();
-                updateUI();
-                renderAll();
-                renderTeamMembers();
-                
-                alert(`Исполнитель ${member.nickname} удален из команды`);
-            }
-        }
-
-        function getAllTeams() {
-            const teams = [];
-            for (let i = 0; i < localStorage.length; i++) {
-                const key = localStorage.key(i);
-                if (key && key.startsWith('team_')) {
-                    const team = JSON.parse(localStorage.getItem(key));
-                    if (team) teams.push(team);
-                }
-            }
-            return teams;
-        }
-
-        function saveTeamToLocalStorage() {
-            if (currentTeam) {
-                localStorage.setItem(currentTeam.id, JSON.stringify(currentTeam));
-                localStorage.setItem('currentTeamId', currentTeam.id);
-                localStorage.setItem('currentUserId', currentUser.id);
-            }
-        }
-
-        function loadTeamFromLocalStorage() {
-            const teamId = localStorage.getItem('currentTeamId');
-            const userId = localStorage.getItem('currentUserId');
-            
-            if (teamId && userId) {
-                const team = JSON.parse(localStorage.getItem(teamId));
-                if (team) {
-                    currentTeam = team;
-                    currentUser = team.members.find(m => m.id === userId);
-                    
-                    if (!currentUser) {
-                        localStorage.removeItem('currentTeamId');
-                        localStorage.removeItem('currentUserId');
-                        return false;
-                    }
-                    
-                    const storedTasks = localStorage.getItem(`tasks_${teamId}`);
-                    if (storedTasks) tasks = JSON.parse(storedTasks);
-                    
-                    const storedSprint = localStorage.getItem(`sprint_${teamId}`);
-                    if (storedSprint) sprint = JSON.parse(storedSprint);
-                    
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        // ========== Инициализация приложения ==========
-        function initApp() {
-            if (loadTeamFromLocalStorage()) {
-                document.getElementById('authModal').classList.add('hidden');
-                document.getElementById('mainApp').classList.remove('hidden');
-                updateUI();
-                renderAll();
-                if (currentUser.role === 'manager') {
-                    renderTeamMembers();
-                    document.getElementById('teamManagement').classList.remove('hidden');
-                }
-            }
-        }
-
-        function updateUI() {
-            const roleBadge = document.getElementById('roleBadge');
-            const userInfo = document.getElementById('userInfo');
-            const teamInfo = document.getElementById('teamInfo');
-            const assigneeSelect = document.getElementById('taskAssignee');
-            
-            if (currentUser.role === 'manager') {
-                roleBadge.textContent = '👔 Руководитель';
-                roleBadge.style.background = '#667eea';
-                document.getElementById('assigneeGroup').style.display = 'block';
-                
-                assigneeSelect.innerHTML = '<option value="">Выберите исполнителя</option>';
-                currentTeam.members.forEach(member => {
-                    if (member.id !== currentUser.id) {
-                        assigneeSelect.innerHTML += `<option value="${member.nickname}">${member.nickname}</option>`;
-                    }
-                });
-                assigneeSelect.innerHTML += `<option value="${currentUser.nickname}">${currentUser.nickname} (Я)</option>`;
-            } else {
-                roleBadge.textContent = '👤 Исполнитель';
-                roleBadge.style.background = '#48bb78';
-                document.getElementById('assigneeGroup').style.display = 'none';
-            }
-            
-            userInfo.textContent = `${currentUser.nickname}`;
-            teamInfo.innerHTML = `🏢 ${currentTeam.name}<br>🔑 Код: ${currentTeam.id}<br>👥 Участников: ${currentTeam.members.length}`;
-        }
-
-        function renderTeamMembers() {
-            const membersList = document.getElementById('membersList');
-            
-            if (!membersList) return;
-            
-            const managers = currentTeam.members.filter(m => m.role === 'manager');
-            const executors = currentTeam.members.filter(m => m.role === 'executor');
-            
-            membersList.innerHTML = `
-                <h3>👔 Руководители</h3>
-                ${managers.map(member => `
-                    <div class="member-item">
-                        <div class="member-info">
-                            <strong>${escapeHtml(member.nickname)}</strong>
-                            <div class="member-role">${member.phone}</div>
-                        </div>
-                    </div>
-                `).join('')}
-                
-                <h3 style="margin-top: 15px;">👤 Исполнители (${executors.length})</h3>
-                ${executors.map(member => `
-                    <div class="member-item">
-                        <div class="member-info">
-                            <strong>${escapeHtml(member.nickname)}</strong>
-                            <div class="member-role">${member.phone}</div>
-                            <div class="member-role">Добавлен: ${member.addedBy === 'self' ? 'самостоятельно' : member.addedBy}</div>
-                        </div>
-                        <button onclick="removeTeamMember('${member.id}')" class="danger">✖️</button>
-                    </div>
-                `).join('')}
-            `;
-        }
-
-        function saveAllData() {
-            localStorage.setItem(`tasks_${currentTeam.id}`, JSON.stringify(tasks));
-            localStorage.setItem(`sprint_${currentTeam.id}`, JSON.stringify(sprint));
-            saveTeamToLocalStorage();
-        }
-
-        // ========== Управление задачами ==========
-        function createTask() {
-            const title = document.getElementById('taskTitle').value;
-            const desc = document.getElementById('taskDesc').value;
-            const dueDate = document.getElementById('taskDue').value;
-            
-            if (!title) {
-                alert('Введите название задачи');
-                return;
-            }
-            
-            let assignee = '';
-            if (currentUser.role === 'manager') {
-                assignee = document.getElementById('taskAssignee').value;
-                if (!assignee) {
-                    alert('Выберите исполнителя');
-                    return;
-                }
-            } else {
-                assignee = currentUser.nickname;
-            }
-            
-            const newTask = {
-                id: Date.now().toString(),
-                title: title,
-                description: desc,
-                dueDate: dueDate,
-                status: 'in_progress',
-                assignee: assignee,
-                createdBy: currentUser.nickname,
-                createdByRole: currentUser.role,
-                createdAt: Date.now(),
-                updatedAt: Date.now()
-            };
-            
-            tasks.push(newTask);
-            saveAllData();
-            renderAll();
-            
-            document.getElementById('taskForm').reset();
-        }
-
-        function updateTaskStatus(taskId, newStatus) {
-            const task = tasks.find(t => t.id === taskId);
-            if (task) {
-                task.status = newStatus;
-                task.updatedAt = Date.now();
-                saveAllData();
-                renderAll();
-            }
-        }
-
-        function assignToSelf(taskId) {
-            const task = tasks.find(t => t.id === taskId);
-            if (task && currentUser.role === 'executor') {
-                task.assignee = currentUser.nickname;
-                task.updatedAt = Date.now();
-                saveAllData();
-                renderAll();
-            }
-        }
-
-        function deleteTask(taskId) {
-            if (confirm('Удалить задачу?')) {
-                tasks = tasks.filter(t => t.id !== taskId);
-                sprint.tasks = sprint.tasks.filter(id => id !== taskId);
-                saveAllData();
-                renderAll();
-            }
-        }
-
-        function addToSprint(taskId) {
-            if (!sprint.tasks.includes(taskId)) {
-                sprint.tasks.push(taskId);
-                saveAllData();
-                renderAll();
-            }
-        }
-
-        function removeFromSprint(taskId) {
-            sprint.tasks = sprint.tasks.filter(id => id !== taskId);
-            saveAllData();
-            renderAll();
-        }
-
-        function updateSprint() {
-            const newName = document.getElementById('sprintName').value;
-            if (newName) sprint.name = newName;
-            saveAllData();
-            renderAll();
-        }
-
-      function logout() {
-    localStorage.removeItem('currentTeamId');
-    localStorage.removeItem('currentUserId');
-    // Не удаляем данные команды — они нужны для повторного входа
-    location.reload();
+// Логика создания спринта
+alert(Спринт "${sprintName}" создан!);
 }
 
+function addMember() {
+const memberName = document.getElementById(‘memberName’).value;
+const memberRole = document.getElementById(‘memberRole’).value;
 
-        // ========== Рендеринг ==========
-        function renderAll() {
-            renderTaskList();
-            renderSprint();
-            if (currentUser.role === 'manager') {
-                renderTeamMembers();
-            }
-        }
-
-        function renderTaskList() {
-    const taskListDiv = document.getElementById('taskList');
-    const groupedTasks = groupTasksByAssignee();
-
-    let html = '';
-
-    Object.keys(groupedTasks).forEach(assignee => {
-        const tasksForAssignee = groupedTasks[assignee];
-
-        html += `
-            <div class="assignee-group" style="margin-bottom: 20px;">
-                <h3 style="color: #333; font-size: 16px; margin-bottom: 10px;">👤 ${escapeHtml(assignee)}</h3>
-                <div class="tasks-for-assignee">
-        `;
-
-        tasksForAssignee.forEach(task => {
-            html += `
-                <div class="task-card">
-                    <div class="task-title">${escapeHtml(task.title)}</div>
-                    <div class="task-description">${escapeHtml(task.description || 'Нет описания')}</div>
-                    <div class="task-meta">
-                <div class="task-meta-row">
-                    <span>👔 ${escapeHtml(task.createdBy)}</span>
-                </div>
-                <div class="task-meta-row">
-                    ${task.dueDate ? `<span class="task-due">📅 ${task.dueDate} ${isOverdue(task.dueDate) ? '⚠️' : ''}</span>` : ''}
-            <span class="task-status ${task.status === 'in_progress' ? 'status-in-progress' : 'status-done'}">
-                ${task.status === 'in_progress' ? 'В работе' : 'Выполнено'}
-            </span>
-        </div>
-            </div>
-            <div class="task-actions">
-                ${task.status === 'in_progress' ?
-                    `<button onclick="updateTaskStatus('${task.id}', 'done')">✅ Завершить</button>` :
-            `<button onclick="updateTaskStatus('${task.id}', 'in_progress')">🔄 Вернуть</button>`
-        }
-        ${currentUser.role === 'executor' && task.assignee !== currentUser.nickname && task.assignee !== 'Не назначен' ?
-            `<button onclick="assignToSelf('${task.id}')">📌 Назначить себе</button>` : ''
-        }
-        ${(currentUser.role === 'manager' || task.createdBy === currentUser.nickname) ?
-            `<button onclick="addToSprint('${task.id}')">🏃 В спринт</button>
-             <button onclick="deleteTask('${task.id}')" class="danger">🗑️</button>` :
-            ''
-        }
-            </div>
-        </div>
-            `;
-        });
-
-        html += `</div></div>`;
-    });
-
-    if (html === '') {
-        taskListDiv.innerHTML = '<p style="text-align: center; color: #888; padding: 20px;">Нет задач. Создайте первую задачу!</p>';
-    } else {
-        taskListDiv.innerHTML = html;
-    }
+if (!memberName) {
+alert(‘Введите имя участника’);
+return;
 }
 
-        function renderSprint() {
-            const sprintInfo = document.getElementById('sprintInfo');
-            const sprintTasksDiv = document.getElementById('sprintTasks');
-            const sprintNameInput = document.getElementById('sprintName');
-            
-            sprintNameInput.value = sprint.name;
-            sprintInfo.innerHTML = `<strong>${escapeHtml(sprint.name)}</strong> | Задач: ${sprint.tasks.length}`;
-            
-            const sprintTaskObjects = sprint.tasks
-                .map(taskId => tasks.find(t => t.id === taskId))
-                .filter(task => task);
-            
-            if (sprintTaskObjects.length === 0) {
-                sprintTasksDiv.innerHTML = '<p style="color: #888; text-align: center;">Нет задач в спринте</p>';
-                return;
-            }
-            
-            sprintTasksDiv.innerHTML = sprintTaskObjects.map(task => `
-                <div class="sprint-task">
-                    <span><strong>${escapeHtml(task.title)}</strong><br><small>${task.status === 'in_progress' ? 'В работе' : 'Выполнено'}</small></span>
-                    <button onclick="removeFromSprint('${task.id}')" class="danger" style="width: auto; padding: 4px 8px;">✖️</button>
-                </div>
-            `).join('');
-        }
-
-        function isOverdue(dueDate) {
-            if (!dueDate) return false;
-            const today = new Date().toISOString().split('T')[0];
-            return dueDate < today;
-        }
-
-        function escapeHtml(str) {
-            if (!str) return '';
-            return str
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#39;');
-        }
-
-        // Настройка обработчиков событий
-        document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('taskForm')?.addEventListener('submit', (e) => {
-                e.preventDefault();
-                createTask();
-            });
-            initApp();
-        });
-
-        function showAvailableTeams() {
-    const teams = getAllTeams();
-    
-    if (teams.length === 0) {
-        alert('Команды не найдены');
-        return;
-    }
-
-    let teamsList = '<h3>🏢 Доступные команды</h3>';
-    teams.forEach(team => {
-        teamsList += `
-            <div class="team-card" style="background: white; padding: 12px; margin: 8px 0; border-radius: 10px;">
-                <strong>${escapeHtml(team.name)}</strong><br>
-                <small>Код: ${team.id}</small><br>
-                <small>Участников: ${team.members.length}</small>
-            </div>
-        `;
-    });
-
-    // Показываем модальное окно с командами
-    showTeamsModal(teamsList);
+// Логика добавления участника
+alert(Участник "${memberName}" добавлен в команду!);
 }
 
-function showTeamsModal(content) {
-    let modal = document.getElementById('teamsModal');
-    if (!modal) {
-        modal = document.createElement('div');
-        modal.id = 'teamsModal';
-        modal.className = 'modal';
-        document.body.appendChild(modal);
-    }
-
-    modal.innerHTML = `
-        <div class="modal-content">
-            <h2>👥 Все команды</h2>
-            ${content}
-            <button onclick="closeTeamsModal()" style="margin-top: 15px;" class="secondary">Закрыть</button>
-        </div>
-    `;
-    modal.classList.remove('hidden');
-}
-
-function closeTeamsModal() {
-    document.getElementById('teamsModal').classList.add('hidden');
-}
-
-function getAllTeams(excludeCurrent = true) {
-    const teams = [];
-    const currentTeamId = localStorage.getItem('currentTeamId');
-
-    for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key && key.startsWith('team_')) {
-            // Пропускаем текущую команду, если нужно
-            if (excludeCurrent && key === currentTeamId) continue;
-
-            const team = JSON.parse(localStorage.getItem(key));
-            if (team) teams.push(team);
-        }
-    }
-    return teams;
-}
-function groupTasksByAssignee() {
-    const groupedTasks = {};
-
-    tasks.forEach(task => {
-        const assignee = task.assignee || 'Не назначен';
-
-        if (!groupedTasks[assignee]) {
-            groupedTasks[assignee] = [];
-        }
-
-        groupedTasks[assignee].push(task);
-    });
-
-    return groupedTasks;
-}
-    </script>
+// Инициализация при загрузке
+document.addEventListener(‘DOMContentLoaded’, function() {
+// Показываем модальное окно авторизации при загрузке
+document.getElementById(‘authModal’).classList.remove(‘hidden’);
+});
+</script>
 </body>
 </html>
+                
