@@ -7,27 +7,54 @@ let sprint = null;
 // Инициализация приложения
 document.addEventListener('DOMContentLoaded', function() {
     loadTeams();
-    setupEventListeners();
+    initializeApp(); // Вместо setupEventListeners()
 });
 
+
 function setupEventListeners() {
-    document.getElementById('registerBtn').addEventListener('click', registerUser);
-    document.getElementById('createTeamBtn').addEventListener('click', createTeam);
-    document.getElementById('createTaskBtn').addEventListener('click', createTask);
-    document.getElementById('startSprintBtn').addEventListener('click', startSprint);
+    // Ждём полной загрузки DOM
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializeApp);
+    } else {
+        initializeApp();
+    }
 }
 
-function loadTeams() {
-    const teams = JSON.parse(localStorage.getItem('teams') || '[]');
-    const teamSelect = document.getElementById('teamSelect');
-    teamSelect.innerHTML = '';
+function initializeApp() {
+    const registerBtn = document.getElementById('registerBtn');
+    const createTeamBtn = document.getElementById('createTeamBtn');
+    const createTaskBtn = document.getElementById('createTaskBtn');
+    const startSprintBtn = document.getElementById('startSprintBtn');
 
-    teams.forEach(team => {
-        const option = document.createElement('option');
-        option.value = team.id;
-        option.textContent = team.name;
-        teamSelect.appendChild(option);
-    });
+    // Проверяем существование элементов перед назначением обработчиков
+    if (registerBtn) registerBtn.addEventListener('click', registerUser);
+    if (createTeamBtn) createTeamBtn.addEventListener('click', createTeam);
+    if (createTaskBtn) createTaskBtn.addEventListener('click', createTask);
+    if (startSprintBtn) startSprintBtn.addEventListener('click', startSprint);
+}
+
+// Улучшенная функция загрузки команд
+function loadTeams() {
+    try {
+        const teams = JSON.parse(localStorage.getItem('teams') || '[]');
+        const teamSelect = document.getElementById('teamSelect');
+
+        if (!teamSelect) {
+            console.error('Элемент teamSelect не найден');
+            return;
+        }
+
+        teamSelect.innerHTML = '';
+
+        teams.forEach(team => {
+            const option = document.createElement('option');
+            option.value = team.id;
+            option.textContent = team.name;
+            teamSelect.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Ошибка загрузки команд:', error);
+    }
 }
 
 function registerUser() {
@@ -41,7 +68,7 @@ function registerUser() {
         return;
     }
 
-    currentUser = {
+   currentUser = {
         id: Date.now().toString(),
         nickname,
         phoneLast4,
@@ -54,6 +81,9 @@ function registerUser() {
         if (!currentTeam.members) currentTeam.members = [];
         currentTeam.members.push(currentUser);
         saveTeam(currentTeam);
+
+        // Сохраняем ID выбранной команды
+        localStorage.setItem('currentTeamId', teamId);
     } else {
         // Создаём новую команду (только для руководителей)
         if (role === 'manager') {
@@ -63,6 +93,9 @@ function registerUser() {
             return;
         }
     }
+
+    // Сохраняем текущего пользователя
+    localStorage.setItem('currentUser', JSON.stringify(currentUser));
 
     showMainApp();
 }
@@ -79,8 +112,16 @@ function createTeam() {
 
     saveTeam(team);
     currentTeam = team;
+
+    // Сохраняем ID команды в localStorage
+    localStorage.setItem('currentTeamId', team.id);
+
+    // Обновляем список команд в интерфейсе
+    loadTeams();
+
     showMainApp();
 }
+
 
 function saveTeam(team) {
     localStorage.setItem(`team_${team.id}`, JSON.stringify(team));
