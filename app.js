@@ -1,295 +1,167 @@
 // Глобальные переменные
-let currentUser = null;
-let currentTeam = null;
-let tasks = [];
-let sprint = null;
+let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+let currentFilter = 'all';
 
 // Инициализация приложения
 document.addEventListener('DOMContentLoaded', function() {
-    loadTeams();
-    initializeApp(); // Вместо setupEventListeners()
+    setupEventListeners();
+    renderTasks();
+    updateStats();
 });
 
-
 function setupEventListeners() {
-    // Ждём полной загрузки DOM
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initializeApp);
-    } else {
-        initializeApp();
-    }
-}
+    // Добавление задачи
+    document.getElementById('addTaskBtn').addEventListener('click', addTask);
+    document.getElementById('taskInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') addTask();
+    });
 
-function initializeApp() {
-    const registerBtn = document.getElementById('registerBtn');
-    const createTeamBtn = document.getElementById('createTeamBtn');
-    const createTaskBtn = document.getElementById('createTaskBtn');
-    const startSprintBtn = document.getElementById('startSprintBtn');
-
-    // Проверяем существование элементов перед назначением обработчиков
-    if (registerBtn) registerBtn.addEventListener('click', registerUser);
-    if (createTeamBtn) createTeamBtn.addEventListener('click', createTeam);
-    if (createTaskBtn) createTaskBtn.addEventListener('click', createTask);
-    if (startSprintBtn) startSprintBtn.addEventListener('click', startSprint);
-}
-
-// Улучшенная функция загрузки команд
-function loadTeams() {
-    try {
-        const teams = JSON.parse(localStorage.getItem('teams') || '[]');
-        const teamSelect = document.getElementById('teamSelect');
-
-        if (!teamSelect) {
-            console.error('Элемент teamSelect не найден');
-            return;
-        }
-
-        teamSelect.innerHTML = '';
-
-        teams.forEach(team => {
-            const option = document.createElement('option');
-            option.value = team.id;
-            option.textContent = team.name;
-            teamSelect.appendChild(option);
+    // Фильтры
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            currentFilter = this.dataset.filter;
+            renderTasks();
         });
-    } catch (error) {
-        console.error('Ошибка загрузки команд:', error);
-    }
-}
-
-function registerUser() {
-    const role = document.getElementById('userRole').value;
-    const teamId = document.getElementById('teamSelect').value;
-    const nickname = document.getElementById('nickname').value.trim();
-    const phoneLast4 = document.getElementById('phoneLast4').value.trim();
-
-    if (!nickname || !phoneLast4) {
-        alert('Заполните все поля');
-        return;
-    }
-
-   currentUser = {
-        id: Date.now().toString(),
-        nickname,
-        phoneLast4,
-        role
-    };
-
-    // Если выбрана существующая команда
-    if (teamId) {
-        currentTeam = JSON.parse(localStorage.getItem(`team_${teamId}`));
-        if (!currentTeam.members) currentTeam.members = [];
-        currentTeam.members.push(currentUser);
-        saveTeam(currentTeam);
-
-        // Сохраняем ID выбранной команды
-        localStorage.setItem('currentTeamId', teamId);
-    } else {
-        // Создаём новую команду (только для руководителей)
-        if (role === 'manager') {
-            createTeam();
-        } else {
-            alert('Выберите команду или создайте новую (только для руководителей)');
-            return;
-        }
-    }
-
-    // Сохраняем текущего пользователя
-    localStorage.setItem('currentUser', JSON.stringify(currentUser));
-
-    showMainApp();
-}
-
-function createTeam() {
-    const teamName = prompt('Введите название команды:');
-    if (!teamName) return;
-
-    const team = {
-        id: Date.now().toString(),
-        name: teamName,
-        members: [currentUser]
-    };
-
-    saveTeam(team);
-    currentTeam = team;
-
-    // Сохраняем ID команды в localStorage
-    localStorage.setItem('currentTeamId', team.id);
-
-    // Обновляем список команд в интерфейсе
-    loadTeams();
-
-    showMainApp();
-}
-
-
-function saveTeam(team) {
-    localStorage.setItem(`team_${team.id}`, JSON.stringify(team));
-    let teams = JSON.parse(localStorage.getItem('teams') || '[]');
-    teams = teams.filter(t => t.id !== team.id);
-    teams.push({ id: team.id, name: team.name });
-    localStorage.setItem('teams', JSON.stringify(teams));
-}
-
-function showMainApp() {
-    document.getElementById('authScreen').classList.add('hidden');
-    document.getElementById('mainApp').classList.remove('hidden');
-
-    document.getElementById('currentTeam').textContent = currentTeam.name;
-    document.getElementById('userName').textContent = currentUser.nickname;
-    document.getElementById('userRoleDisplay').textContent =
-        currentUser.role === 'manager' ? 'Руководитель' : 'Исполнитель';
-
-    // Заполняем список исполнителей (только для руководителей)
-    if (currentUser.role === 'manager') {
-        const assigneeSelect = document.getElementById('taskAssignee');
-        assigneeSelect.innerHTML = '';
-        currentTeam.members.forEach(member => {
-            const option = document.createElement('option');
-            option.value = member.id;
-            option.textContent = `${member.nickname} (${member.phoneLast4})`;
-            assigneeSelect.appendChild(option);
-        });
-    } else {
-        document.getElementById('assigneeSection').classList.add('hidden');
-    }
-
-    loadTasks();
-}
-
-function createTask() {
-    const description = document.getElementById('taskDescription').value.trim();
-    const dueDate = document.getElementById('taskDueDate').value;
-    let assigneeId = currentUser.id; // По умолчанию — сам пользователь
-
-    if (currentUser.role === 'manager') {
-        assigneeId = document.getElementById('taskAssignee').value;
-    }
-
-    if (!description || !dueDate) {
-        alert('Заполните описание и срок выполнения');
-        return;
-    }
-
-    const task = {
-        id: Date.now().toString(),
-        description,
-        dueDate,
-        status: 'in-progress', // в работе
-        creatorId: currentUser.id,
-        assigneeId,
-        createdAt: new Date().toISOString()
-    };
-
-    tasks.push(task);
-    saveTasks();
-    loadTasks();
-
-    // Очищаем форму
-    document.getElementById('taskDescription').value = '';
-    document.getElementById('taskDueDate').value = '';
-}
-
-function loadTasks() {
-    const tasksList = document.getElementById('tasksList');
-    tasksList.innerHTML = '';
-
-    const userTasks = tasks.filter(task =>
-        task.assigneeId === currentUser.id || task.creatorId === currentUser.id
-    );
-
-    if (userTasks.length === 0) {
-        tasksList.innerHTML = '<p>Нет задач</p>';
-        return;
-    }
-
-    userTasks.forEach(task => {
-        const taskCard = document.createElement('div');
-        taskCard.className = 'task-card';
-        taskCard.innerHTML = `
-            <div><strong>Описание:</strong> ${task.description}</div>
-            <div><strong>Срок:</strong> ${formatDate(task.dueDate)}</div>
-            <div><strong>Статус:</strong> <span class="status-${task.status}">
-                ${task.status === 'in-progress' ? 'В работе' : 'Выполнено'}
-            </span></div>
-            ${currentUser.role === 'manager' || task.creatorId === currentUser.id ?
-                `<button onclick="toggleTaskStatus('${task.id}')">
-                    ${task.status === 'in-progress' ? 'Отметить выполненным' : 'Вернуть в работу'}
-        </button>` : ''}
-        `;
-        tasksList.appendChild(taskCard);
     });
 }
 
-function toggleTaskStatus(taskId) {
-    const task = tasks.find(t => t.id === taskId);
-    if (task) {
-        task.status = task.status === 'in-progress' ? 'done' : 'in-progress';
-        saveTasks();
-        loadTasks();
-    }
-}
+function addTask() {
+    const taskInput = document.getElementById('taskInput');
+    const description = taskInput.value.trim();
 
-function saveTasks() {
-    localStorage.setItem(`tasks_${currentTeam.id}`, JSON.stringify(tasks));
-}
-
-function startSprint() {
-    if (confirm('Начать новый спринт? Все текущие задачи будут включены в спринт.')) {
-        sprint = {
-            id: Date.now().toString(),
-            startDate: new Date().toISOString(),
-            tasks: [...tasks] // Копируем все текущие задачи
-        };
-        localStorage.setItem(`sprint_${currentTeam.id}`, JSON.stringify(sprint));
-        updateSprintDisplay();
-    }
-}
-
-function updateSprintDisplay() {
-    const sprintInfo = document.getElementById('sprintInfo');
-    const sprintTasksList = document.getElementById('sprintTasksList');
-
-    if (!sprint) {
-        sprintInfo.textContent = 'Спринт не создан';
-        sprintTasksList.innerHTML = '';
+    if (!description) {
+        alert('Введите описание задачи!');
         return;
     }
 
-    sprintInfo.textContent = `Спринт начат: ${formatDate(sprint.startDate)}`;
-    sprintTasksList.innerHTML = '';
+    const newTask = {
+        id: Date.now(),
+        description: description,
+        completed: false
+    };
 
-    sprint.tasks.forEach(task => {
-    const taskElement = document.createElement('div');
-    taskElement.className = 'task-card';
-    taskElement.innerHTML = `
-        <div>${task.description} (${formatDate(task.dueDate)})</div>
-        <div class="status-${task.status}">
-            Статус: ${task.status === 'in-progress' ? 'В работе' : 'Выполнено'}
-        </div>
-    `;
-    sprintTasksList.appendChild(taskElement);
-});
+    tasks.push(newTask);
+    saveTasks();
+    renderTasks();
+    updateStats();
+
+    // Очищаем поле ввода
+    taskInput.value = '';
 }
 
-function formatDate(dateString) {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('ru-RU');
+function toggleTask(id) {
+    tasks = tasks.map(task =>
+        task.id === id ? { ...task, completed: !task.completed } : task
+    );
+    saveTasks();
+    renderTasks();
+    updateStats();
 }
 
-// Загружаем данные при старте
-window.addEventListener('load', function() {
-    // Проверяем, есть ли сохранённая сессия
-    const savedUser = localStorage.getItem('currentUser');
-    const savedTeamId = localStorage.getItem('currentTeamId');
+function deleteTask(id) {
+    if (confirm('Удалить эту задачу?')) {
+        tasks = tasks.filter(task => task.id !== id);
+        saveTasks();
+        renderTasks();
+        updateStats();
+    }
+}
 
-    if (savedUser && savedTeamId) {
-        currentUser = JSON.parse(savedUser);
-        currentTeam = JSON.parse(localStorage.getItem(`team_${savedTeamId}`));
-        tasks = JSON.parse(localStorage.getItem(`tasks_${savedTeamId}`)) || [];
-        sprint = JSON.parse(localStorage.getItem(`sprint_${savedTeamId}`)) || null;
+function renderTasks() {
+    const tasksList = document.getElementById('tasksList');
+    tasksList.innerHTML = '';
 
-        showMainApp();
-        updateSprintDisplay();
+    // Фильтруем задачи в зависимости от выбранного фильтра
+    let filteredTasks = tasks;
+
+    if (currentFilter === 'active') {
+        filteredTasks = tasks.filter(task => !task.completed);
+    } else if (currentFilter === 'completed') {
+        filteredTasks = tasks.filter(task => task.completed);
+    }
+
+    // Если нет задач для отображения
+    if (filteredTasks.length === 0) {
+        tasksList.innerHTML = `
+            <div class="no-tasks">
+                ${currentFilter === 'all' ? 'Нет задач' :
+                currentFilter === 'active' ? 'Нет активных задач' : 'Нет выполненных задач'}
+            </div>
+        `;
+        return;
+    }
+
+    // Создаём элементы для каждой задачи
+    filteredTasks.forEach(task => {
+        const taskElement = document.createElement('div');
+        taskElement.className = `task-item ${task.completed ? 'completed' : ''}`;
+        taskElement.innerHTML = `
+            <input type="checkbox"
+                   class="task-checkbox"
+                  ${task.completed ? 'checked' : ''}
+                   onclick="toggleTask(${task.id})">
+            <span class="task-text">${task.description}</span>
+            <button class="delete-btn" onclick="deleteTask(${task.id})">Удалить</button>
+        `;
+        tasksList.appendChild(taskElement);
+    });
+}
+
+function saveTasks() {
+    localStorage.setItem('tasks', JSON.stringify(tasks));
+}
+
+function updateStats() {
+    const totalCount = tasks.length;
+    const completedCount = tasks.filter(task => task.completed).length;
+    const remainingCount = totalCount - completedCount;
+
+    document.getElementById('totalCount').textContent = totalCount;
+    document.getElementById('completedCount').textContent = completedCount;
+    document.getElementById('remainingCount').textContent = remainingCount;
+}
+
+// Дополнительные функции для работы с клавиатурой
+document.addEventListener('keydown', function(e) {
+    // Esc — очистка поля ввода
+    if (e.key === 'Escape') {
+        document.getElementById('taskInput').value = '';
     }
 });
+
+// Функция очистки всех выполненных задач
+function clearCompleted() {
+    if (confirm('Удалить все выполненные задачи?')) {
+        tasks = tasks.filter(task => !task.completed);
+        saveTasks();
+        renderTasks();
+        updateStats();
+    }
+}
+
+// Добавляем кнопку очистки выполненных задач в интерфейс
+function addClearButton() {
+    const clearBtn = document.createElement('button');
+    clearBtn.textContent = 'Очистить выполненные';
+    clearBtn.className = 'clear-btn';
+    clearBtn.style.cssText = `
+        margin-top: 15px;
+        padding: 8px 16px;
+        background: #ff6b6b;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background 0.3s;
+        width: 100%;
+    `;
+    clearBtn.addEventListener('click', clearCompleted);
+
+    const statsElement = document.querySelector('.stats');
+    statsElement.parentNode.insertBefore(clearBtn, statsElement.nextSibling);
+}
+
+// Вызываем после инициализации
+addClearButton();
