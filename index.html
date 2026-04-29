@@ -3,148 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Трекер задач со спринтом</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: Arial, sans-serif;
-            background: #f5f5f5;
-            padding: 20px;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        input, select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-        button {
-            background: #4CAF50;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-right: 10px;
-        }
-        .hidden {
-            display: none;
-        }
-        .task-card {
-            border: 1px solid #eee;
-            padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 5px;
-            background: #fafafa;
-        }
-        .status-in-progress {
-            color: #FF9800;
-        }
-        .status-done {
-            color: #4CAF50;
-            text-decoration: line-through;
-        }
-        .sprint-section {
-            margin-top: 30px;
-            padding: 15px;
-            background: #e3f2fd;
-            border-radius: 5px;
-        }
-    </style>
+    <title>Трекер задач</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
-        <!-- Экран регистрации -->
-        <div id="authScreen">
-            <h1>Регистрация в Трекере задач</h1>
-            <div class="form-group">
-                <label>Роль</label>
-                <select id="userRole">
-                    <option value="manager">Руководитель</option>
-                    <option value="executor">Исполнитель</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Команда</label>
-                <select id="teamSelect">
-                    <!-- Команды будут добавляться динамически -->
-                </select>
-                <button type="button" id="createTeamBtn">Создать новую команду</button>
-            </div>
-            <div class="form-group">
-                <label>Никнейм</label>
-                <input type="text" id="nickname" placeholder="Введите никнейм">
-            </div>
-            <div class="form-group">
-                <label>Последние 4 цифры телефона</label>
-                <input type="text" id="phoneLast4" placeholder="XXXX">
-            </div>
-            <button id="registerBtn">Зарегистрироваться</button>
+        <header>
+            <h1>Трекер задач</h1>
+        </header>
+
+        <!-- Форма добавления задачи -->
+        <div class="add-task">
+            <input type="text" id="taskInput" placeholder="Введите описание задачи...">
+            <button id="addTaskBtn">Добавить задачу</button>
         </div>
 
-        <!-- Основной интерфейс -->
-        <div id="mainApp" class="hidden">
-            <h1>Трекер задач — <span id="currentTeam"></span></h1>
-            <p>Привет, <span id="userName"></span> (<span id="userRoleDisplay"></span>)</p>
-
-            <!-- Создание задачи -->
-            <div class="form-group">
-                <h3>Создать задачу</h3>
-                <div class="form-group">
-                    <label>Описание задачи</label>
-                    <textarea id="taskDescription" rows="3"></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Срок выполнения</label>
-                    <input type="date" id="taskDueDate">
-                </div>
-                <div class="form-group" id="assigneeSection">
-                    <label>Исполнитель</label>
-                    <select id="taskAssignee">
-                <!-- Исполнители будут добавляться динамически -->
-            </select>
+        <!-- Фильтры -->
+        <div class="filters">
+            <button class="filter-btn active" data-filter="all">Все</button>
+            <button class="filter-btn" data-filter="active">Активные</button>
+            <button class="filter-btn" data-filter="completed">Выполненные</button>
         </div>
-        <button id="createTaskBtn">Создать задачу</button>
-    </div>
 
-    <!-- Список задач -->
-    <div>
-        <h3>Мои задачи</h3>
-        <div id="tasksList">
+        <!-- Список задач -->
+        <div id="tasksList" class="tasks-list">
             <!-- Задачи будут добавляться динамически -->
         </div>
-    </div>
 
-    <!-- Спринт -->
-    <div class="sprint-section">
-        <h3>Текущий спринт</h3>
-        <p id="sprintInfo">Спринт не создан</p>
-        <button id="startSprintBtn">Начать новый спринт</button>
-        <div id="sprintTasksList">
-            <!-- Задачи спринта будут добавляться динамически -->
+        <!-- Статистика -->
+        <div class="stats">
+            Всего задач: <span id="totalCount">0</span> |
+            Выполнено: <span id="completedCount">0</span> |
+            Осталось: <span id="remainingCount">0</span>
         </div>
     </div>
-</div>
-</div>
-<script src="app.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
